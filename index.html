@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="fr-CA">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Terrain Neutre — Outils pour le sport amateur</title>
+  <meta name="description" content="Terrain Neutre regroupe des applications web pour le sport amateur : gestion des arbitres, des alignements et des tournois.">
+  <meta property="og:title" content="Terrain Neutre">
+  <meta property="og:description" content="Des outils simples pour le sport amateur : arbitres, alignements et tournois.">
+  <meta property="og:url" content="https://terrainneutre.ca">
+  <meta property="og:type" content="website">
+  <meta name="theme-color" content="#1f3d2b">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Crect x='2' y='2' width='44' height='44' rx='11' fill='%231f3d2b'/%3E%3Crect x='9' y='12' width='30' height='24' rx='3' fill='none' stroke='%23f4efe4' stroke-width='2.5'/%3E%3Cline x1='24' y1='12' x2='24' y2='36' stroke='%23f4efe4' stroke-width='2.5'/%3E%3Ccircle cx='24' cy='24' r='5' fill='none' stroke='%23f4efe4' stroke-width='2.5'/%3E%3Ccircle cx='24' cy='24' r='1.8' fill='%23c8643b'/%3E%3C/svg%3E">
+  <style>
+    :root {
+      --bg: #f6f2e9;
+      --surface: #fffdf8;
+      --ink: #1c2520;
+      --muted: #5d6a62;
+      --line: #e3dccd;
+      --green: #1f3d2b;
+      --green-soft: #e4ece5;
+      --clay: #c8643b;
+      --clay-soft: #f6e3d9;
+      --radius: 18px;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #121814;
+        --surface: #19211c;
+        --ink: #eef1ec;
+        --muted: #a2ada6;
+        --line: #2a352e;
+        --green: #7fb08f;
+        --green-soft: #1f2d24;
+        --clay: #e08a63;
+        --clay-soft: #3a2519;
+      }
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.55;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    a { color: inherit; }
+    .wrap { width: min(1080px, 100% - 2.5rem); margin-inline: auto; }
+
+    /* En-tête */
+    header { padding: 1.75rem 0; }
+    .brand {
+      display: inline-flex; align-items: center; gap: .7rem;
+      text-decoration: none; font-weight: 700; font-size: 1.1rem; letter-spacing: -.01em;
+    }
+    .brand svg { width: 34px; height: 34px; flex: none; }
+
+    /* Héros */
+    .hero {
+      padding: clamp(2.5rem, 8vw, 6rem) 0 clamp(2rem, 6vw, 4rem);
+      position: relative;
+    }
+    .hero::before {
+      /* losange en filigrane, rappel du terrain */
+      content: ""; position: absolute; right: -4rem; top: 50%;
+      width: 360px; height: 360px; transform: translateY(-50%) rotate(45deg);
+      border: 2px dashed var(--line); border-radius: 6px; z-index: -1;
+    }
+    .eyebrow {
+      display: inline-block; font-size: .8rem; font-weight: 600; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--clay); margin-bottom: 1rem;
+    }
+    h1 {
+      font-size: clamp(2.2rem, 6vw, 3.75rem); line-height: 1.08; letter-spacing: -.03em;
+      max-width: 16ch; font-weight: 800;
+    }
+    h1 em { font-style: normal; color: var(--green); }
+    .lede { margin-top: 1.25rem; font-size: clamp(1.05rem, 2.2vw, 1.2rem); color: var(--muted); max-width: 52ch; }
+
+    /* Cartes d'applications */
+    .apps { padding-bottom: clamp(3rem, 8vw, 5rem); }
+    .apps h2 { font-size: .85rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: 1.25rem; font-weight: 600; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.25rem; }
+    .card {
+      position: relative; display: flex; flex-direction: column; gap: .9rem;
+      background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+      padding: 1.6rem; text-decoration: none;
+      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+    }
+    a.card:hover, a.card:focus-visible {
+      transform: translateY(-3px); border-color: var(--green);
+      box-shadow: 0 12px 30px -16px rgba(0,0,0,.35); outline: none;
+    }
+    .card .icon {
+      width: 46px; height: 46px; border-radius: 12px; display: grid; place-items: center;
+      background: var(--green-soft); color: var(--green);
+    }
+    .card .icon svg { width: 24px; height: 24px; }
+    .card h3 { font-size: 1.25rem; letter-spacing: -.01em; }
+    .card p { color: var(--muted); font-size: .97rem; flex: 1; }
+    .card .foot { display: flex; align-items: center; justify-content: space-between; gap: .5rem; font-size: .9rem; }
+    .domain { font-weight: 600; color: var(--green); }
+    .arrow { transition: transform .18s ease; }
+    a.card:hover .arrow { transform: translateX(4px); }
+    .badge {
+      font-size: .72rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase;
+      padding: .25rem .6rem; border-radius: 999px; white-space: nowrap;
+    }
+    .badge.live { background: var(--green-soft); color: var(--green); }
+    .badge.soon { background: var(--clay-soft); color: var(--clay); }
+    .card.soon { cursor: default; }
+    .card.soon .icon { background: var(--clay-soft); color: var(--clay); }
+    .card.soon .domain { color: var(--muted); }
+
+    /* Pied de page */
+    footer { margin-top: auto; border-top: 1px solid var(--line); padding: 1.5rem 0; font-size: .88rem; color: var(--muted); }
+    footer .wrap { display: flex; flex-wrap: wrap; gap: .75rem 1.5rem; justify-content: space-between; }
+    footer a { color: var(--muted); }
+    footer a:hover { color: var(--ink); }
+
+    /* Carte Arbitres : reprend l'identité de arbitres.ca (bleu #2563eb) */
+    .card.arb {
+      color: #fff; border-color: #1e2a4a;
+      background:
+        radial-gradient(120% 80% at 100% 0%, rgba(37,99,235,.25), transparent 60%),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28'%3E%3Cpath d='M14 0 28 14 14 28 0 14Z' fill='none' stroke='%23ffffff' stroke-opacity='.04'/%3E%3C/svg%3E"),
+        #0f172a;
+    }
+    a.card.arb:hover, a.card.arb:focus-visible { border-color: #2563eb; box-shadow: 0 14px 34px -14px rgba(37,99,235,.55); }
+    .arb-brand { display: flex; align-items: center; gap: .55rem; font-weight: 700; font-size: 1rem; }
+    .arb-brand svg { width: 20px; height: 20px; }
+    .arb-pill {
+      align-self: flex-start; font-size: .68rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+      color: #93c5fd; border: 1px solid #1d4ed8; background: rgba(37,99,235,.12);
+      padding: .3rem .7rem; border-radius: 999px; display: inline-flex; align-items: center; gap: .45rem;
+    }
+    .arb-pill::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #60a5fa; }
+    .card.arb h3 { font-size: 1.5rem; line-height: 1.15; font-weight: 800; letter-spacing: -.025em; color: #fff; }
+    .card.arb p { color: #cbd5e1; }
+    .cta {
+      display: inline-flex; align-items: center; gap: .35rem; background: #2563eb; color: #fff;
+      font-weight: 700; font-size: .9rem; padding: .55rem 1rem; border-radius: 8px;
+    }
+    a.card.arb:hover .cta { background: #1d4ed8; }
+    .card.arb .badge.live { background: rgba(34,197,94,.15); color: #86efac; }
+
+    @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <a class="brand" href="/" aria-label="Terrain Neutre — accueil">
+        <svg viewBox="0 0 48 48" aria-hidden="true">
+          <rect x="2" y="2" width="44" height="44" rx="11" fill="#1f3d2b"/>
+          <rect x="9" y="12" width="30" height="24" rx="3" fill="none" stroke="#f4efe4" stroke-width="2.5"/>
+          <line x1="24" y1="12" x2="24" y2="36" stroke="#f4efe4" stroke-width="2.5"/>
+          <circle cx="24" cy="24" r="5" fill="none" stroke="#f4efe4" stroke-width="2.5"/>
+          <circle cx="24" cy="24" r="1.8" fill="#c8643b"/>
+        </svg>
+        Terrain Neutre
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap">
+        <span class="eyebrow">Outils pour le sport amateur</span>
+        <h1>Moins de paperasse, <em>plus de jeu.</em></h1>
+        <p class="lede">Terrain Neutre regroupe des applications web conçues pour les organisations, les entraîneurs et les officiels du sport amateur au Québec.</p>
+      </div>
+    </section>
+
+    <section class="apps" aria-labelledby="apps-title">
+      <div class="wrap">
+        <h2 id="apps-title">Nos applications</h2>
+        <div class="grid">
+
+          <!-- Arbitres : en ligne -->
+          <a class="card arb" href="https://arbitres.ca" rel="noopener">
+            <div class="arb-brand">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 22 12 12 22 2 12Z" fill="#3b82f6"/><path d="M12 7 17 12 12 17 7 12Z" fill="#bfdbfe"/></svg>
+              Arbitres Baseball
+            </div>
+            <span class="arb-pill">Gestion d'arbitres</span>
+            <h3>La gestion des arbitres, simplifiée.</h3>
+            <p>Disponibilités, assignations, balance et fiabilité pour coordonner les arbitres de baseball de votre organisation.</p>
+            <div class="foot">
+              <span class="cta">Visiter arbitres.ca <svg class="arrow" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></span>
+              <span class="badge live">En ligne</span>
+            </div>
+          </a>
+
+          <!-- MonAlignement : en construction -->
+          <div class="card soon" aria-disabled="true">
+            <div class="icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13"/><path d="M3 6h.01M3 12h.01M3 18h.01"/></svg>
+            </div>
+            <h3>MonAlignement</h3>
+            <p>Préparez vos alignements et positions défensives en quelques clics, match après match.</p>
+            <div class="foot">
+              <span class="domain">monalignement.ca</span>
+              <span class="badge soon">Bientôt</span>
+            </div>
+          </div>
+
+          <!-- GestionTournoi : en construction -->
+          <div class="card soon" aria-disabled="true">
+            <div class="icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+            </div>
+            <h3>GestionTournoi</h3>
+            <p>Horaires, classements et résultats de tournois multisports, centralisés au même endroit.</p>
+            <div class="foot">
+              <span class="domain">gestiontournoi.ca</span>
+              <span class="badge soon">Bientôt</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      <span>© <span id="y">2026</span> Terrain Neutre</span>
+      <span>Fait au Québec</span>
+    </div>
+  </footer>
+
+  <script>document.getElementById('y').textContent = new Date().getFullYear();</script>
+</body>
+</html>
